@@ -1,0 +1,498 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary);background:var(--color-background-tertiary)}
+.app{display:flex;flex-direction:column;min-height:600px}
+.tabs{display:flex;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.tab{flex:1;padding:11px 6px;text-align:center;font-size:12px;font-weight:500;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent;transition:all 0.15s}
+.tab.active{color:#185FA5;border-bottom-color:#185FA5}
+.panel{display:none;flex-direction:column;flex:1}
+.panel.active{display:flex}
+.toolbar{padding:10px 14px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);border-radius:var(--border-radius-md);padding:6px 12px;font-size:12px;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.btn:hover{background:var(--color-background-secondary)}
+.btn:active{transform:scale(0.97)}
+.btn-blue{background:#E6F1FB;color:#0C447C;border-color:#85B7EB}
+.btn-green{background:#EAF3DE;color:#27500A;border-color:#97C459}
+.btn-amber{background:#FAEEDA;color:#633806;border-color:#EF9F27}
+.btn-red{background:#FCEBEB;color:#791F1F;border-color:#F09595}
+.btn-purple{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC}
+.spacer{flex:1}
+.search-box{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:6px 10px;font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);width:150px}
+.table-wrap{overflow-x:auto;flex:1}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:820px}
+thead th{background:var(--color-background-secondary);padding:7px 10px;text-align:left;font-weight:500;font-size:11px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);white-space:nowrap;position:sticky;top:0}
+tbody tr{border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer}
+tbody tr:hover{background:var(--color-background-secondary)}
+tbody tr.selected{background:#E6F1FB}
+tbody td{padding:7px 10px;vertical-align:middle;white-space:nowrap}
+.cb{width:32px;text-align:center}
+.tag-cell{font-weight:500;color:#185FA5}
+.sbadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
+.s-found{background:#EAF3DE;color:#27500A}
+.s-notfound{background:#FCEBEB;color:#791F1F}
+.img-thumb{width:32px;height:32px;border-radius:4px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--color-text-tertiary)}
+.copy-panel{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 14px}
+.copy-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.copy-count{background:#185FA5;color:#E6F1FB;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#E6F1FB;color:#0C447C;border-radius:var(--border-radius-md);padding:3px 10px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px}
+.chip-x{cursor:pointer;color:#185FA5;font-size:13px;line-height:1}
+.chip-x:hover{color:#791F1F}
+.bulk-panel{background:var(--color-background-primary);padding:0}
+.bulk-header{padding:12px 14px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:10px}
+.bulk-title{font-size:13px;font-weight:500}
+.bulk-sub{font-size:11px;color:var(--color-text-secondary)}
+.bulk-rows{overflow-y:auto;max-height:340px}
+.bulk-row{border-bottom:0.5px solid var(--color-border-tertiary);padding:10px 14px}
+.bulk-row-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.row-tag-label{font-size:12px;font-weight:500;color:#185FA5;background:#E6F1FB;padding:2px 10px;border-radius:10px}
+.bulk-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bf label{font-size:10px;color:var(--color-text-secondary);display:block;margin-bottom:3px}
+.bf input,.bf select{width:100%;border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:5px 8px;font-size:11px;background:var(--color-background-primary);color:var(--color-text-primary)}
+.bf.full{grid-column:1/-1}
+.img-upload-area{border:0.5px dashed var(--color-border-secondary);border-radius:6px;padding:8px;text-align:center;cursor:pointer;font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);position:relative;overflow:hidden}
+.img-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.img-preview{width:100%;height:60px;object-fit:cover;border-radius:4px;margin-top:4px}
+.bulk-footer{padding:10px 14px;border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:8px;justify-content:flex-end}
+.overlay{background:rgba(0,0,0,0.35);padding:20px 14px;min-height:500px;display:flex;align-items:flex-start;justify-content:center}
+.modal{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);width:100%;max-width:580px}
+.modal-header{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-size:14px;font-weight:500}
+.modal-body{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;max-height:70vh;overflow-y:auto}
+.modal-body .bf.full{grid-column:1/-1}
+.modal-footer{padding:10px 16px;border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:8px;justify-content:flex-end}
+.hidden{display:none}
+.view-btn{padding:5px 10px;font-size:11px}
+.view-btn.active{background:#E6F1FB;color:#0C447C;border-color:#85B7EB}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:14px;flex:1}
+.gcard{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;cursor:pointer;transition:border-color 0.15s}
+.gcard:hover{border-color:var(--color-border-secondary)}
+.gcard.selected{border:1.5px solid #185FA5}
+.gcard-img{width:100%;height:90px;object-fit:cover;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--color-text-tertiary)}
+.gcard-body{padding:7px 8px}
+.gcard-tag{font-size:12px;font-weight:500;color:#185FA5}
+.gcard-sub{font-size:10px;color:var(--color-text-secondary);margin-top:2px}
+.empty{text-align:center;padding:40px;color:var(--color-text-secondary);font-size:13px}
+
+/* Settings panel */
+.settings-body{padding:16px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;max-height:520px}
+.set-group{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.set-group-header{padding:10px 14px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
+.set-group-title{font-size:13px;font-weight:500}
+.set-items{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.set-item{display:flex;align-items:center;gap:8px}
+.set-item-label{font-size:12px;flex:1;padding:5px 8px;background:var(--color-background-secondary);border-radius:6px}
+.set-item input{flex:1;border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:5px 8px;font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary)}
+.add-item-row{display:flex;gap:6px;margin-top:4px}
+.add-item-row input{flex:1;border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:5px 8px;font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary)}
+</style>
+
+<div class="app">
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('list')">รายการ TAG</div>
+  <div class="tab" onclick="switchTab('copy')">คัดลอก &amp; แก้ไข <span id="copy-tab-badge" class="hidden" style="background:#E24B4A;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px"></span></div>
+  <div class="tab" onclick="switchTab('settings')">ตั้งค่า Dropdown</div>
+</div>
+
+<!-- TAB 1: LIST -->
+<div class="panel active" id="tab-list">
+  <div class="toolbar">
+    <button class="btn btn-blue" onclick="openAdd()">+ เพิ่มรายการ</button>
+    <button class="btn btn-amber" id="copy-sel-btn" onclick="copySelected()" style="display:none">คัดลอก TAG ที่เลือก (<span id="sel-n">0</span>)</button>
+    <button class="btn btn-red" id="del-sel-btn" onclick="deleteSelected()" style="display:none">ลบที่เลือก</button>
+    <div class="spacer"></div>
+    <button class="btn view-btn active" id="vbtn-table" onclick="setView('table')">ตาราง</button>
+    <button class="btn view-btn" id="vbtn-gallery" onclick="setView('gallery')">แกลเลอรี</button>
+    <input class="search-box" placeholder="ค้นหา TAG / KEY..." oninput="renderList(this.value)" id="srch">
+  </div>
+  <div id="list-content" style="flex:1;overflow:auto"></div>
+</div>
+
+<!-- TAB 2: COPY & EDIT -->
+<div class="panel" id="tab-copy">
+  <div id="copy-panel-area"></div>
+  <div id="bulk-area"></div>
+</div>
+
+<!-- TAB 3: SETTINGS -->
+<div class="panel" id="tab-settings">
+  <div class="toolbar">
+    <span style="font-size:13px;font-weight:500">จัดการรายการ Dropdown</span>
+    <span style="font-size:11px;color:var(--color-text-secondary)">เพิ่ม/ลบตัวเลือกได้ตามต้องการ</span>
+  </div>
+  <div class="settings-body" id="settings-body"></div>
+</div>
+
+<!-- Modal add/edit single -->
+<div id="modal-overlay" class="hidden">
+<div class="overlay">
+<div class="modal">
+  <div class="modal-header">
+    <h3 id="modal-title">เพิ่มรายการใหม่</h3>
+    <button class="btn" onclick="closeModal()" style="padding:3px 8px">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="bf"><label>KEY</label><input id="m-key" placeholder="C001"></div>
+    <div class="bf"><label>TAG</label><input id="m-tag" placeholder="TAG-001"></div>
+    <div class="bf"><label>สถานะ</label>
+      <select id="m-status">
+        <option value="พบ">พบ</option>
+        <option value="ไม่พบ">ไม่พบ</option>
+      </select>
+    </div>
+    <div class="bf"><label>เจ้าของสาย</label><select id="m-owner"></select></div>
+    <div class="bf"><label>ชนิดสาย</label><select id="m-type"></select></div>
+    <div class="bf"><label>ประเภทสาย</label><select id="m-subtype"></select></div>
+    <div class="bf"><label>เส้นผ่านศูนย์กลาง (มม.)</label><input id="m-dia" type="number" placeholder="25"></div>
+    <div class="bf"><label>จำนวนเส้น</label><input id="m-count" type="number" placeholder="4"></div>
+    <div class="bf"><label>จำนวน Core</label><input id="m-core" type="number" placeholder="12"></div>
+    <div class="bf"><label>วันที่</label><input id="m-date" type="date"></div>
+    <div class="bf"><label>พิกัด</label><input id="m-coord" placeholder="13.75, 100.52"></div>
+    <div class="bf full"><label>รูปภาพ</label>
+      <div class="img-upload-area">
+        <input type="file" accept="image/*" onchange="previewImg(this,'m-img-preview')">
+        <div id="m-img-label">คลิกเพื่ออัปโหลดรูปภาพ</div>
+        <img id="m-img-preview" class="img-preview hidden">
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal()">ยกเลิก</button>
+    <button class="btn btn-blue" onclick="saveModal()">บันทึก</button>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+let dropdowns = {
+  owner: ['กฟน.','กฟภ.','TOT','NT','CAT'],
+  type:  ['สายไฟ','สายใยแก้ว','สายทองแดง','สายโทรศัพท์'],
+  subtype: ['ใต้ดิน','อากาศ','ร้อยท่อ'],
+};
+
+let data=[
+  {id:1,key:'C001',tag:'TAG-001',status:'พบ',owner:'กฟน.',type:'สายไฟ',subtype:'ใต้ดิน',dia:25,count:4,core:12,img:'',date:'2024-01-15',coord:'13.7563, 100.5018'},
+  {id:2,key:'C002',tag:'TAG-002',status:'ไม่พบ',owner:'กฟภ.',type:'สายใยแก้ว',subtype:'อากาศ',dia:10,count:1,core:48,img:'',date:'2024-02-20',coord:'13.7580, 100.5120'},
+  {id:3,key:'C003',tag:'TAG-003',status:'พบ',owner:'TOT',type:'สายทองแดง',subtype:'ใต้ดิน',dia:15,count:2,core:24,img:'',date:'2024-03-05',coord:'13.7500, 100.4950'},
+  {id:4,key:'C004',tag:'TAG-004',status:'พบ',owner:'NT',type:'สายไฟ',subtype:'อากาศ',dia:20,count:3,core:8,img:'',date:'2024-04-10',coord:'13.7600, 100.5200'},
+];
+let nid=5, selected=new Set(), copied=[], editId=null, viewMode='table';
+
+function sc(s){return s==='พบ'?'s-found':'s-notfound';}
+
+function switchTab(t){
+  const tabs=['list','copy','settings'];
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
+  document.querySelectorAll('.panel').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
+  if(t==='copy') renderCopyPanel();
+  if(t==='settings') renderSettings();
+}
+
+function populateSelect(selId, key, current){
+  const sel=document.getElementById(selId);
+  if(!sel) return;
+  sel.innerHTML=dropdowns[key].map(v=>`<option value="${v}" ${v===current?'selected':''}>${v}</option>`).join('');
+}
+
+function setView(v){
+  viewMode=v;
+  document.getElementById('vbtn-table').classList.toggle('active',v==='table');
+  document.getElementById('vbtn-gallery').classList.toggle('active',v==='gallery');
+  renderList(document.getElementById('srch').value);
+}
+
+function renderList(q=''){
+  const f=data.filter(r=>!q||(r.tag+r.key+r.owner).toLowerCase().includes(q.toLowerCase()));
+  const el=document.getElementById('list-content');
+  if(viewMode==='gallery'){
+    el.innerHTML=`<div class="gallery">${f.length?f.map(r=>`
+      <div class="gcard ${selected.has(r.id)?'selected':''}" onclick="toggleSel(${r.id})">
+        ${r.img?`<img src="${r.img}" class="gcard-img">`:`<div class="gcard-img">ไม่มีรูป</div>`}
+        <div class="gcard-body">
+          <div class="gcard-tag">${r.tag}</div>
+          <div class="gcard-sub">${r.key} · <span class="sbadge ${sc(r.status)}">${r.status}</span></div>
+          <div class="gcard-sub" style="margin-top:3px">${r.owner}</div>
+        </div>
+      </div>`).join(''):'<div class="empty">ไม่พบรายการ</div>'}</div>`;
+  } else {
+    el.innerHTML=`<div class="table-wrap"><table>
+      <thead><tr>
+        <th class="cb"><input type="checkbox" id="chk-all" onchange="toggleAll(this,'${q}')"></th>
+        <th>KEY</th><th>TAG</th><th>สถานะ</th><th>เจ้าของสาย</th><th>ชนิดสาย</th><th>ประเภทสาย</th>
+        <th>เส้นผ่าน(มม.)</th><th>เส้น</th><th>Core</th><th>รูปภาพ</th><th>วันที่</th><th>จัดการ</th>
+      </tr></thead>
+      <tbody>${f.length?f.map(r=>`
+        <tr class="${selected.has(r.id)?'selected':''}">
+          <td class="cb"><input type="checkbox" ${selected.has(r.id)?'checked':''} onchange="toggleSel(${r.id})"></td>
+          <td>${r.key}</td>
+          <td class="tag-cell">${r.tag}</td>
+          <td><span class="sbadge ${sc(r.status)}">${r.status}</span></td>
+          <td>${r.owner}</td><td>${r.type}</td><td>${r.subtype}</td>
+          <td style="text-align:center">${r.dia}</td>
+          <td style="text-align:center">${r.count}</td>
+          <td style="text-align:center">${r.core}</td>
+          <td>${r.img?`<img src="${r.img}" style="width:32px;height:32px;border-radius:4px;object-fit:cover">`:`<div class="img-thumb">ไม่มี</div>`}</td>
+          <td>${r.date}</td>
+          <td><button class="btn" style="padding:3px 8px;font-size:11px" onclick="openEdit(${r.id})">แก้ไข</button></td>
+        </tr>`).join(''):'<tr><td colspan="13" class="empty">ไม่พบรายการ</td></tr>'}
+      </tbody></table></div>`;
+  }
+  updateSelBar();
+}
+
+function toggleSel(id){
+  if(selected.has(id)) selected.delete(id); else selected.add(id);
+  renderList(document.getElementById('srch').value);
+}
+function toggleAll(cb,q){
+  const f=data.filter(r=>!q||(r.tag+r.key+r.owner).toLowerCase().includes(q.toLowerCase()));
+  if(cb.checked) f.forEach(r=>selected.add(r.id)); else f.forEach(r=>selected.delete(r.id));
+  renderList(q);
+}
+function updateSelBar(){
+  const n=selected.size;
+  const cb=document.getElementById('copy-sel-btn');
+  const db=document.getElementById('del-sel-btn');
+  if(cb){cb.style.display=n?'':'none';document.getElementById('sel-n').textContent=n;}
+  if(db) db.style.display=n?'':'none';
+}
+
+function copySelected(){
+  if(!selected.size) return;
+  data.filter(r=>selected.has(r.id)).forEach(r=>{if(!copied.find(c=>c.id===r.id)) copied.push({...r});});
+  const badge=document.getElementById('copy-tab-badge');
+  badge.textContent=copied.length; badge.classList.remove('hidden');
+  navigator.clipboard&&navigator.clipboard.writeText(data.filter(r=>selected.has(r.id)).map(r=>r.tag).join(', '));
+  switchTab('copy');
+}
+function deleteSelected(){
+  if(!confirm('ลบ '+selected.size+' รายการ?')) return;
+  data=data.filter(r=>!selected.has(r.id)); selected.clear(); renderList();
+}
+
+function renderCopyPanel(){
+  const area=document.getElementById('copy-panel-area');
+  const bulk=document.getElementById('bulk-area');
+  if(!copied.length){
+    area.innerHTML=`<div class="empty" style="padding:40px">ยังไม่มี TAG ที่คัดลอก<br><span style="font-size:12px;margin-top:6px;display:block">ไปที่แท็บ "รายการ TAG" เลือกรายการแล้วกด "คัดลอก TAG ที่เลือก"</span></div>`;
+    bulk.innerHTML=''; return;
+  }
+  area.innerHTML=`
+    <div class="copy-panel">
+      <div class="copy-header">
+        <span style="font-size:13px;font-weight:500">TAG ที่คัดลอก</span>
+        <span class="copy-count">${copied.length} รายการ</span>
+        <button class="btn btn-red" style="margin-left:auto;font-size:11px;padding:4px 10px" onclick="clearCopied()">ล้างทั้งหมด</button>
+      </div>
+      <div class="chips">${copied.map(r=>`<div class="chip">${r.tag}<span class="chip-x" onclick="removeCopied(${r.id})">×</span></div>`).join('')}</div>
+    </div>`;
+
+  const ownerOpts = dropdowns.owner.map(v=>`<option value="${v}">${v}</option>`).join('');
+  const typeOpts  = dropdowns.type.map(v=>`<option value="${v}">${v}</option>`).join('');
+  const subtypeOpts = dropdowns.subtype.map(v=>`<option value="${v}">${v}</option>`).join('');
+
+  bulk.innerHTML=`
+    <div class="bulk-panel">
+      <div class="bulk-header">
+        <div><div class="bulk-title">แก้ไขรายละเอียด TAG ที่คัดลอก</div>
+        <div class="bulk-sub">แก้ไขทีละรายการด้านล่าง แล้วกด "บันทึกทั้งหมด"</div></div>
+      </div>
+      <div class="bulk-rows">
+        ${copied.map((r,i)=>`
+        <div class="bulk-row" id="brow-${r.id}">
+          <div class="bulk-row-head">
+            <span style="font-size:11px;color:var(--color-text-secondary)">#${i+1}</span>
+            <span class="row-tag-label" id="blabel-${r.id}">${r.tag}</span>
+            <span style="font-size:11px;color:var(--color-text-secondary);margin-left:4px">${r.key}</span>
+          </div>
+          <div class="bulk-fields">
+            <div class="bf"><label>KEY</label><input id="bkey-${r.id}" value="${r.key}"></div>
+            <div class="bf"><label>TAG ใหม่</label><input id="btag-${r.id}" value="${r.tag}" oninput="document.getElementById('blabel-${r.id}').textContent=this.value||'${r.tag}'"></div>
+            <div class="bf"><label>สถานะ</label>
+              <select id="bstatus-${r.id}">
+                <option value="พบ" ${r.status==='พบ'?'selected':''}>พบ</option>
+                <option value="ไม่พบ" ${r.status==='ไม่พบ'?'selected':''}>ไม่พบ</option>
+              </select>
+            </div>
+            <div class="bf"><label>เจ้าของสาย</label>
+              <select id="bowner-${r.id}">${dropdowns.owner.map(v=>`<option ${v===r.owner?'selected':''}>${v}</option>`).join('')}</select>
+            </div>
+            <div class="bf"><label>ชนิดสาย</label>
+              <select id="btype-${r.id}">${dropdowns.type.map(v=>`<option ${v===r.type?'selected':''}>${v}</option>`).join('')}</select>
+            </div>
+            <div class="bf"><label>ประเภทสาย</label>
+              <select id="bsubtype-${r.id}">${dropdowns.subtype.map(v=>`<option ${v===r.subtype?'selected':''}>${v}</option>`).join('')}</select>
+            </div>
+            <div class="bf"><label>เส้นผ่าน(มม.)</label><input id="bdia-${r.id}" type="number" value="${r.dia}"></div>
+            <div class="bf"><label>จำนวนเส้น</label><input id="bcount-${r.id}" type="number" value="${r.count}"></div>
+            <div class="bf"><label>จำนวน Core</label><input id="bcore-${r.id}" type="number" value="${r.core}"></div>
+            <div class="bf"><label>วันที่</label><input id="bdate-${r.id}" type="date" value="${r.date}"></div>
+            <div class="bf"><label>พิกัด</label><input id="bcoord-${r.id}" value="${r.coord}"></div>
+            <div class="bf"><label>รูปภาพ</label>
+              <div class="img-upload-area">
+                <input type="file" accept="image/*" onchange="previewBulkImg(this,${r.id})">
+                <div id="bimglbl-${r.id}" style="font-size:10px">${r.img?'มีรูปแล้ว':'คลิกอัปโหลดรูป'}</div>
+                <img id="bimgprev-${r.id}" src="${r.img||''}" class="img-preview ${r.img?'':'hidden'}">
+                <input type="hidden" id="bimgdata-${r.id}" value="${r.img||''}">
+              </div>
+            </div>
+          </div>
+        </div>`).join('')}
+      </div>
+      <div class="bulk-footer">
+        <button class="btn" onclick="clearCopied()">ยกเลิก</button>
+        <button class="btn btn-green" onclick="saveBulk()">บันทึกทั้งหมด (${copied.length} รายการ)</button>
+      </div>
+    </div>`;
+}
+
+function removeCopied(id){copied=copied.filter(r=>r.id!==id);const b=document.getElementById('copy-tab-badge');if(copied.length){b.textContent=copied.length;}else{b.classList.add('hidden');}renderCopyPanel();}
+function clearCopied(){copied=[];document.getElementById('copy-tab-badge').classList.add('hidden');renderCopyPanel();}
+
+function saveBulk(){
+  copied.forEach(r=>{
+    const idx=data.findIndex(x=>x.id===r.id); if(idx<0) return;
+    data[idx]={...data[idx],
+      key:document.getElementById('bkey-'+r.id).value,
+      tag:document.getElementById('btag-'+r.id).value,
+      status:document.getElementById('bstatus-'+r.id).value,
+      owner:document.getElementById('bowner-'+r.id).value,
+      type:document.getElementById('btype-'+r.id).value,
+      subtype:document.getElementById('bsubtype-'+r.id).value,
+      dia:parseFloat(document.getElementById('bdia-'+r.id).value)||0,
+      count:parseInt(document.getElementById('bcount-'+r.id).value)||0,
+      core:parseInt(document.getElementById('bcore-'+r.id).value)||0,
+      date:document.getElementById('bdate-'+r.id).value,
+      coord:document.getElementById('bcoord-'+r.id).value,
+      img:document.getElementById('bimgdata-'+r.id).value,
+    };
+  });
+  alert('บันทึกเรียบร้อย '+copied.length+' รายการ');
+  clearCopied(); switchTab('list'); renderList();
+}
+
+function previewImg(input, prevId){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById(prevId);
+    img.src=e.target.result; img.classList.remove('hidden');
+    const lbl=input.parentElement.querySelector('div[id]');
+    if(lbl) lbl.textContent='รูปพร้อมแล้ว';
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewBulkImg(input, id){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById('bimgprev-'+id);
+    img.src=e.target.result; img.classList.remove('hidden');
+    document.getElementById('bimgdata-'+id).value=e.target.result;
+    document.getElementById('bimglbl-'+id).textContent='รูปพร้อมแล้ว';
+  };
+  reader.readAsDataURL(file);
+}
+
+/* Settings */
+function renderSettings(){
+  const labels={owner:'เจ้าของสาย',type:'ชนิดสาย',subtype:'ประเภทสาย'};
+  const body=document.getElementById('settings-body');
+  body.innerHTML=Object.keys(dropdowns).map(key=>`
+    <div class="set-group">
+      <div class="set-group-header">
+        <span class="set-group-title">${labels[key]}</span>
+        <span style="font-size:11px;color:var(--color-text-secondary)">${dropdowns[key].length} รายการ</span>
+      </div>
+      <div class="set-items" id="set-items-${key}">
+        ${dropdowns[key].map((v,i)=>`
+          <div class="set-item" id="set-item-${key}-${i}">
+            <span class="set-item-label">${v}</span>
+            <button class="btn btn-red" style="padding:3px 8px;font-size:11px" onclick="removeDropdownItem('${key}',${i})">ลบ</button>
+          </div>`).join('')}
+      </div>
+      <div style="padding:8px 14px 12px">
+        <div class="add-item-row">
+          <input id="new-item-${key}" placeholder="พิมพ์รายการใหม่..." onkeydown="if(event.key==='Enter') addDropdownItem('${key}')">
+          <button class="btn btn-green" onclick="addDropdownItem('${key}')">+ เพิ่ม</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function addDropdownItem(key){
+  const inp=document.getElementById('new-item-'+key);
+  const val=inp.value.trim(); if(!val) return;
+  if(dropdowns[key].includes(val)){alert('มีรายการนี้แล้ว');return;}
+  dropdowns[key].push(val); inp.value='';
+  renderSettings();
+}
+
+function removeDropdownItem(key, idx){
+  dropdowns[key].splice(idx,1);
+  renderSettings();
+}
+
+/* Modal */
+function openAdd(){
+  editId=null;
+  document.getElementById('modal-title').textContent='เพิ่มรายการใหม่';
+  ['key','tag','dia','count','core','date','coord'].forEach(f=>{const el=document.getElementById('m-'+f);if(el)el.value='';});
+  document.getElementById('m-status').value='พบ';
+  populateSelect('m-owner','owner','');
+  populateSelect('m-type','type','');
+  populateSelect('m-subtype','subtype','');
+  document.getElementById('m-img-preview').src='';
+  document.getElementById('m-img-preview').classList.add('hidden');
+  document.getElementById('m-img-label').textContent='คลิกเพื่ออัปโหลดรูปภาพ';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function openEdit(id){
+  const r=data.find(x=>x.id===id); editId=id;
+  document.getElementById('modal-title').textContent='แก้ไข: '+r.tag;
+  document.getElementById('m-key').value=r.key;
+  document.getElementById('m-tag').value=r.tag;
+  document.getElementById('m-status').value=r.status;
+  populateSelect('m-owner','owner',r.owner);
+  populateSelect('m-type','type',r.type);
+  populateSelect('m-subtype','subtype',r.subtype);
+  document.getElementById('m-dia').value=r.dia;
+  document.getElementById('m-count').value=r.count;
+  document.getElementById('m-core').value=r.core;
+  document.getElementById('m-date').value=r.date;
+  document.getElementById('m-coord').value=r.coord;
+  const prev=document.getElementById('m-img-preview');
+  if(r.img){prev.src=r.img;prev.classList.remove('hidden');}else{prev.src='';prev.classList.add('hidden');}
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');}
+
+function saveModal(){
+  const rec={
+    key:document.getElementById('m-key').value.trim(),
+    tag:document.getElementById('m-tag').value.trim(),
+    status:document.getElementById('m-status').value,
+    owner:document.getElementById('m-owner').value,
+    type:document.getElementById('m-type').value,
+    subtype:document.getElementById('m-subtype').value,
+    dia:parseFloat(document.getElementById('m-dia').value)||0,
+    count:parseInt(document.getElementById('m-count').value)||0,
+    core:parseInt(document.getElementById('m-core').value)||0,
+    date:document.getElementById('m-date').value,
+    coord:document.getElementById('m-coord').value.trim(),
+    img:document.getElementById('m-img-preview').src&&document.getElementById('m-img-preview').src!==window.location.href?document.getElementById('m-img-preview').src:'',
+  };
+  if(!rec.tag){alert('กรุณากรอก TAG');return;}
+  if(editId){const i=data.findIndex(x=>x.id===editId);data[i]={...data[i],...rec};}
+  else{data.push({id:nid++,...rec});}
+  closeModal(); renderList();
+}
+
+renderList();
+</script>
